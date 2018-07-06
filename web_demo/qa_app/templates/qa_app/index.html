@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <style>
+            body {background-color: grey; background-size: cover; background-attachment: fixed}
+            h1   {color: white; font-size: 200%; font-family: courier; text-align: center; display: block}
+            p    {color: white; font-size: 100%; font-family: courier; text-align: center}
+            div  {background-color: white}
+        </style>
+    </head>
+
+    {% load static %}
+    <body background = {% static "qa_app/images/background.jpg" %}>
+        <h1><b>SHORT INTRODUCTION</b></h1>
+        <p>Given a paragraph and a question, the app will hightlight the sentence that is most relevant to the question.</p>
+
+        <h1>PASSAGE</h1>
+        <form action="/html/tags/html_form_tag_action.cfm" method="post">
+            <center><textarea id = "id_passage" type ="text" style="width:50%;height:30px;background-color:white;border:none;padding:3%;font:15px/30px sans-serif" required placeholder= "Passage" ></textarea></center>
+        </form>
+
+        <h1>QUESTION</h1>
+        <form action="/html/tags/html_form_tag_action.cfm" method="post">
+            <center><textarea id = "id_question" type ="text" style="width:54%;height:20px;background-color:white;border:none;padding:1%;font:15px/30px sans-serif" required placeholder= "Question?" ></textarea></center>
+        </form>
+
+        <center><input type = "submit" value="RUN" width = 20% heigh = 10px onclick="onRun()"></center>
+
+        <h1>HIGHTLIGHTED ANSWER</h1>
+        <p id='id_answer'></p>
+    </body>
+
+    <script>
+    function onRun() {
+      var passage_text = $('#id_passage').val();
+      var question_text = $('#id_question').val();
+
+      if (question_text.length == 0) {
+        alert('Question is empty')
+        return
+      }
+
+      if (passage_text.length == 0) {
+        alert('Passage is empty')
+        return
+      }
+
+      // Make a POST request
+      var data = new FormData();
+      data.append('paragraph_text', passage_text)
+      data.append('question_text', question_text)
+      jQuery.ajax({
+        url: '/answer/',
+        data: data,
+        cache: false,
+        contentType: false,
+        processData: false,
+        method: 'POST',
+        type: 'POST', // For jQuery < 1.9
+        success: function(data){
+          $('#id_answer').html('')
+          var result = data['result']
+          var all_sents = result['all_sents']
+          var selected_sent = result['selected_sent']
+
+          var resultHTML = "";
+          for (var i = 0; i < all_sents.length; i++) {
+            sentenceHTML = all_sents[i]
+            if (all_sents[i] == selected_sent) {
+              sentenceHTML = ('<mark>' + sentenceHTML + "</mark>")
+            } else {
+              sentenceHTML =  ' ' + sentenceHTML + ' '
+            }
+            if (i > 0)
+              sentenceHTML = " " + sentenceHTML
+            resultHTML += sentenceHTML
+          }
+          $('#id_answer').append("<p>" + resultHTML + "</p>")
+
+
+        }
+      });
+
+    }
+    </script>
+</html>
+
+
+
+
+
+    >
+</html>
